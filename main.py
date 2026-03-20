@@ -29,6 +29,7 @@ class InvoiceData:
     TaxCode: str = ""
     Reason: str = ""
     Products: List[ProductItem] = []
+    Fee: str = ""
     TotalBeforeTax: str = ""
     TaxAmount: str = ""
     TotalPayment: str = ""
@@ -79,10 +80,10 @@ def parse_xml(file):
                     invoice.DateHD = subItem.text
                     invoice.DateCT = subItem.text
 
-        for item in root.findall('./DLHDon/NDHDon/NMua'):
+        for item in root.findall('./DLHDon/NDHDon/NBan'):
             for subItem in item:
                 if (subItem.tag == "Ten"):
-                    invoice.BuyerName = subItem.text
+                    invoice.CompanyName = subItem.text
                 elif (subItem.tag == "DChi"):
                     invoice.Address = subItem.text
                 elif (subItem.tag == "MST"):
@@ -98,6 +99,13 @@ def parse_xml(file):
                     invoice.TaxAmount = subItem.text
                 elif (subItem.tag == "TgTTTBSo"):
                     invoice.TotalPayment = subItem.text
+                elif (subItem.tag == "DSLPhi"):
+                    subItemList = subItem.findall('./LPhi/TPhi')
+                    print(subItemList)
+                    for subSubItem in subItemList:
+                        print(subSubItem.tag)
+                        if (subSubItem.tag == "TPhi"):
+                            invoice.Fee = subSubItem.text
 
         itemList = root.findall('./DLHDon/NDHDon/DSHHDVu/HHDVu')
         totalTtems = len(itemList)
@@ -128,7 +136,7 @@ def parse_xml(file):
                             [invoice.ID, invoice.number, invoice.DateHD, invoice.DateCT, invoice.CTNo, invoice.CustomerID, 
                             invoice.BuyerName, invoice.CompanyName, invoice.Address, invoice.TaxCode, invoice.Reason, 
                             product.ProductID, product.ProductName, product.Unit, product.Quantity, product.UnitPrice,
-                            product.TotalUnitPrice, product.Discount, product.TaxRate, invoice.TotalBeforeTax, invoice.TaxAmount, invoice.TotalPayment])
+                            product.TotalUnitPrice, product.Discount, product.TaxRate, invoice.Fee, invoice.TotalBeforeTax, invoice.TaxAmount, invoice.TotalPayment])
             else:
                 append_row("InvoiceData.xlsx", "Data", 
                             [invoice.ID, invoice.number, invoice.DateHD, invoice.DateCT, invoice.CTNo, invoice.CustomerID, 
@@ -169,7 +177,7 @@ def main():
         # 1. Define headers and create the file
         headers = ['Ky Hieu', 'So hoa don', 'Ngay HD', 'Ngay CT', 'So CT', 'Ma KH', 'To ten nguoi mua', 'Ten don vi', 'Dia chi',
                     'Ma so thue', 'Ly do', 'Ma HH', 'Ten hang hoa dich vu', 'Don vi tinh', 'So luong', 'Don gia', 'Thanh tien', 
-                    'Chiet khau', 'Thue suat', 'Tong tien truoc thue', 'Tien thue', 'Tong tien thanh toan']
+                    'Chiet khau', 'Thue suat', 'Phi', 'Tong tien truoc thue', 'Tien thue', 'Tong tien thanh toan']
 
         create_excel_with_headers("InvoiceData.xlsx", "Data", headers)
 
